@@ -1,29 +1,57 @@
+'use client';
 import Image from 'next/image';
 import styles from './page.module.css';
+import { useState, useEffect } from 'react';
 
-function Bs(props) {
+export default function Home() {
+  const [fact, setFact] = useState(null);
+
+  useEffect(() => {
+    // Fetch an initial fact when the component mounts
+    apiCall().then((initialFact) => {
+      setFact(initialFact);
+    });
+  }, []);
+
+  const fetchNewFact = () => {
+    // Fetch a new fact and update the state
+    apiCall().then((newFact) => {
+      setFact(newFact);
+    });
+  };
+
   return (
-    <div className={`${styles.card} ${styles.center}`}>
-      <ul>
-        <li>{props.element} -Sushi Roll</li>
-      </ul>
+    <main className={styles.main}>
+      <QuoteBox fact={fact} />
+      <Button onClick={fetchNewFact} />
+    </main>
+  );
+}
+
+const apiCall = async () => {
+  try {
+    const res = await fetch('https://catfact.ninja/fact');
+    const data = await res.json();
+    return data.fact;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+function QuoteBox({ fact }) {
+  return (
+    <div className={styles.card}>
+      <h2>Anonymous</h2>
+      <div className={styles.cardText}>{fact || 'Loading...'}</div>
     </div>
   );
 }
 
-export default async function Home() {
-  const res = await fetch('https://catfact.ninja/fact');
-  const str = await res.json();
-  const arry = ['Skywalker Roll', 'Rock & Roll', 'Puyallup Roll'];
+const Button = ({ onClick }) => {
   return (
-    <>
-      <main className={styles.main}>{str.fact}</main>
-      <div>
-        <h2 className={styles.center}>My Sushi Order</h2>
-        {arry.map((el) => (
-          <Bs element={el} word="banana" />
-        ))}
-      </div>
-    </>
+    <button type="button" onClick={onClick}>
+      Anotha One
+    </button>
   );
-}
+};
